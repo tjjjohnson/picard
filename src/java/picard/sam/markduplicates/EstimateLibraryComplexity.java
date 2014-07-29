@@ -27,6 +27,8 @@ package picard.sam.markduplicates;
 import picard.PicardException;
 import picard.cmdline.Option;
 import picard.cmdline.StandardOptionDefinitions;
+import htsjdk.samtools.SamReader;
+import htsjdk.samtools.SamReaderFactory;
 import picard.cmdline.Usage;
 import htsjdk.samtools.util.IOUtil;
 import htsjdk.samtools.metrics.MetricsFile;
@@ -268,7 +270,7 @@ public class EstimateLibraryComplexity extends AbstractOpticalDuplicateFinderCom
         final ProgressLogger progress = new ProgressLogger(log, (int) 1e6, "Read");
         for (final File f : INPUT) {
             final Map<String, PairedReadSequence> pendingByName = new HashMap<String, PairedReadSequence>();
-            final SAMFileReader in = new SAMFileReader(f);
+            final SamReader in = SamReaderFactory.makeDefault().referenceSequence(REFERENCE_SEQUENCE).open(f);
             readGroups.addAll(in.getFileHeader().getReadGroups());
 
             for (final SAMRecord rec : in) {

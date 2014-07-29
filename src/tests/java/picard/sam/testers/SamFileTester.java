@@ -2,11 +2,11 @@ package picard.sam.testers;
 
 import htsjdk.samtools.DuplicateScoringStrategy.ScoringStrategy;
 import htsjdk.samtools.SAMFileHeader;
-import htsjdk.samtools.SAMFileReader;
 import htsjdk.samtools.SAMFileWriter;
 import htsjdk.samtools.SAMFileWriterFactory;
 import htsjdk.samtools.SAMRecord;
 import htsjdk.samtools.SAMRecordSetBuilder;
+import htsjdk.samtools.SamReader;
 import htsjdk.samtools.util.IOUtil;
 import htsjdk.samtools.util.CloseableIterator;
 import org.testng.Assert;
@@ -88,7 +88,7 @@ public abstract class SamFileTester {
 
     private void setOutputDir() {
         this.outputDir = IOUtil.createTempDir(this.getClass().getSimpleName() + ".", ".tmp");
-        if(deleteOnExit){
+        if (deleteOnExit) {
             outputDir.deleteOnExit();
         }
     }
@@ -115,6 +115,7 @@ public abstract class SamFileTester {
         }
         return readName;
     }
+
     // Below are a bunch of utility methods for adding records to the SAMRecordSetBuilder
     public void addUnmappedFragment(final int referenceSequenceIndex,
                                     final int defaultQualityScore) {
@@ -122,7 +123,7 @@ public abstract class SamFileTester {
     }
 
     public void addUnmappedFragment(final int referenceSequenceIndex,
-                                    final String qualityString){
+                                    final String qualityString) {
         addFragment(referenceSequenceIndex, -1, true, false, null, qualityString, -1, false);
     }
 
@@ -304,7 +305,7 @@ public abstract class SamFileTester {
         return input;
     }
 
-    public SAMFileReader getInput(){
+    public SamReader getInput() {
         return samRecordSetBuilder.getSamReader();
     }
 }
