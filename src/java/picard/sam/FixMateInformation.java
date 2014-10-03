@@ -26,8 +26,6 @@ package picard.sam;
 
 import htsjdk.samtools.BAMRecordCodec;
 import htsjdk.samtools.BamFileIoUtils;
-import htsjdk.samtools.DuplicateScoringStrategy;
-import htsjdk.samtools.DuplicateScoringStrategy.ScoringStrategy;
 import htsjdk.samtools.MergingSamRecordIterator;
 import htsjdk.samtools.SAMFileHeader;
 import htsjdk.samtools.SAMFileHeader.SortOrder;
@@ -123,8 +121,7 @@ public class FixMateInformation extends CommandLineProgram {
                 IOUtil.assertFileIsWritable(soleInput);
                 IOUtil.assertDirectoryIsWritable(dir);
                 OUTPUT = File.createTempFile(soleInput.getName() + ".being_fixed.", BamFileIoUtils.BAM_FILE_EXTENSION, dir);
-            } catch (IOException ioe) {
-            catch (final IOException ioe) {
+            } catch (final IOException ioe) {
                 throw new RuntimeIOException("Could not create tmp file in " + dir.getAbsolutePath());
             }
         }
