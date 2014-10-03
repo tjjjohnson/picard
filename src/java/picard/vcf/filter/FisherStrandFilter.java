@@ -1,6 +1,10 @@
 package picard.vcf.filter;
 
+import htsjdk.samtools.util.CollectionUtil;
 import htsjdk.variant.variantcontext.VariantContext;
+import htsjdk.variant.vcf.VCFFilterHeaderLine;
+
+import java.util.List;
 
 /**
  * Filters records based on the phred scaled p-value from the Fisher Strand test stored in
@@ -9,10 +13,15 @@ import htsjdk.variant.variantcontext.VariantContext;
  * @author tfennell
  */
 public class FisherStrandFilter implements VariantFilter {
-    private double maxPhredScalePValue;
+    private final double maxPhredScalePValue;
 
     public FisherStrandFilter(final double maxPhredScalePValue) {
         this.maxPhredScalePValue= maxPhredScalePValue;
+    }
+
+    @Override
+    public List<VCFFilterHeaderLine> headerLines() {
+        return CollectionUtil.makeList(new VCFFilterHeaderLine("StrandBias", "Site exhibits excessive allele/strand correlation."));
     }
 
     @Override

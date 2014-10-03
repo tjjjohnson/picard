@@ -1,6 +1,9 @@
 package picard.vcf.filter;
 
 import htsjdk.variant.variantcontext.VariantContext;
+import htsjdk.variant.vcf.VCFFilterHeaderLine;
+
+import java.util.List;
 
 /**
  * Interface for classes that can generate filters for VariantContexts. The contract is that a
@@ -11,4 +14,6 @@ import htsjdk.variant.variantcontext.VariantContext;
  */
 public interface VariantFilter {
     public String filter(final VariantContext ctx);
+
+    public List<VCFFilterHeaderLine> headerLines();
 }

@@ -28,7 +28,10 @@ public class FilterApplyingVariantIterator implements CloseableIterator<VariantC
     private final VariantFilter[] filters;
     private final GenotypeFilter[] gtFilters;
 
-
+    /**
+     * Constructs an iterator from an underlying iterator and the provided (possibly empty)
+     * collections of variant and genotype filters.
+     */
     public FilterApplyingVariantIterator(final Iterator<VariantContext> iterator,
                                          final Collection<VariantFilter> filters,
                                          final Collection<GenotypeFilter> gtFilters) {
@@ -56,39 +59,41 @@ public class FilterApplyingVariantIterator implements CloseableIterator<VariantC
         final ListMap<String,String> gtFilterStrings = new ListMap<String,String>();
         for (final Genotype gt : ctx.getGenotypes()) {
             for (final GenotypeFilter filter : gtFilters) {
-                gtFilterStrings.add(gt.getSampleName(), filter.filter(ctx, gt));
+                final String filterString = filter.filter(ctx,gt);
+                if (filterString != null)  gtFilterStrings.add(gt.getSampleName(), filterString);
             }
         }
 
-        // If we haven't accumulated any filters at all, just pass the record through
-        if (filterStrings.isEmpty() && gtFilterStrings.isEmpty()) return ctx;
+        // If all genotypes are filtered apply a site level filter
+        if (gtFilterStrings.size() == ctx.getNSamples()) {
+            filterStrings.add("AllGtsFiltered");
+        }
 
+        // Make a builder and set the site level filter appropriately
         final VariantContextBuilder builder = new VariantContextBuilder(ctx);
-        if (!filterStrings.isEmpty()) builder.filters(filterStrings);
-
-        if (!gtFilterStrings.isEmpty()) {
-            // Apply filters to the necessary genotypes
-            builder.noGenotypes();
-            final List<Genotype> newGenotypes = new ArrayList<Genotype>(ctx.getNSamples());
-            for (final Genotype gt : ctx.getGenotypes()) {
-                final List<String> filters = gtFilterStrings.get(gt.getSampleName());
-                if (filters == null || filters.isEmpty()) {
-                    newGenotypes.add(gt);
-                }
-                else {
-                    final GenotypeBuilder gtBuilder = new GenotypeBuilder(gt);
-                    gtBuilder.filters(filters);
-                    newGenotypes.add(gtBuilder.make());
-                }
-            }
-            builder.genotypes(newGenotypes);
-
-
-            // If all genotypes are filtered apply a site level filter
-            if (gtFilterStrings.size() == ctx.getNSamples()) {
-                builder.filter("AllGtsFiltered");
-            }
+        if (filterStrings.isEmpty()) {
+            builder.passFilters();
         }
+        else {
+            builder.filters(filterStrings);
+        }
+
+        // Apply filters to the necessary genotypes
+        builder.noGenotypes();
+        final List<Genotype> newGenotypes = new ArrayList<Genotype>(ctx.getNSamples());
+        for (final Genotype gt : ctx.getGenotypes()) {
+            final GenotypeBuilder gtBuilder = new GenotypeBuilder(gt);
+            final List<String> filters = gtFilterStrings.get(gt.getSampleName());
+
+            if (filters == null || filters.isEmpty()) {
+                gtBuilder.filter("PASS");
+            }
+            else {
+                gtBuilder.filters(filters);
+            }
+            newGenotypes.add(gtBuilder.make());
+        }
+        builder.genotypes(newGenotypes);
 
         return builder.make();
     }
