@@ -249,16 +249,10 @@ public class MungeVcfs extends CommandLineProgram {
                     variantContexts.add(vc);
             }
         }
-        //System.out.println("variantContexts has " + variantContexts.size() + " variant contexts");
-        // while some variant contexts are not null
         Integer variantCount = 0;
 
         while (!allItemsAreNull(variantContexts)) {
             VariantContext firstVariantContext = findFirstVariantContext(variantContextComparator, variantContexts);
-
-            //printVariantContexts(variantContexts);
-            //System.out.println("firstVariantContext is " + firstVariantContext);
-
 
             VariantContextBuilder variantContextBuilder = new VariantContextBuilder(firstVariantContext);
             variantContextBuilder.noGenotypes();
@@ -269,19 +263,14 @@ public class MungeVcfs extends CommandLineProgram {
                     currentVariantContexts.add(vc);
                 }
             }
-            //System.out.println("variantContexts has " + variantContexts.size() + " variant contexts");
-            //System.out.println("currentVariantContexts has " + currentVariantContexts.size() + " variant contexts");
 
             List<Genotype> genotypes = new ArrayList<Genotype>(sampleSet.size());
             for (String sample : sampleSet)
             {
-                // look through the variant contexts in the current position
-                // and find the one that has the sample
                 Genotype g = null;
                 for (VariantContext vc : currentVariantContexts) {
                     g = vc.getGenotype(sample);
 
-                    
                     if (g != null) {
                         break;
                     }
@@ -296,7 +285,6 @@ public class MungeVcfs extends CommandLineProgram {
             VariantContext vc = variantContextBuilder.make();
             writer.add(vc);
             
-            //variantContexts.remove(0);
             progress.record(firstVariantContext.getContig(), firstVariantContext.getStart());
             for (int i = 0; i < iteratorCollection.size(); i++) {
                 CloseableIterator<VariantContext> iterator = iteratorCollection.get(i);
@@ -307,9 +295,6 @@ public class MungeVcfs extends CommandLineProgram {
             }
             
             variantCount++;
-            // if(variantCount > 10) {
-            //     break;
-            // }
         }
 
         writer.close();
